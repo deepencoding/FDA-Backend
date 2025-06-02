@@ -1,12 +1,11 @@
-'use strict';
-
 import express from 'express';
 import { sql } from 'bun';
-import { auth } from './middlewares/auth';
-import userRouter from './routes/user';
+import { auth } from './middlewares/auth.middleware';
+import userRouter from './routes/user.route';
+import { config } from './config/env';
 
 const app = express();
-const port = 3000;
+const port = config.PORT || 3000;
 
 type Restaurant = {
   id: number;
@@ -25,7 +24,7 @@ app.use(userRouter);
 app.use(auth);
 
 // Protected routes
-app.get('/', async (req, res) => {
+app.get('/', async (_req, res) => {
   try {
     const restaurants: Restaurant[] = await sql`SELECT restaurant_id, name, type, rating, image_url, address FROM restaurant_info`;
     res.json({
@@ -35,7 +34,8 @@ app.get('/', async (req, res) => {
           name: r.name,
           type: r.type,
           rating: r.rating.toString()
-        }))
+        })),
+        message: 'List of all registered restaurants returned.'
       }
     });
   } catch(error) {
@@ -48,5 +48,5 @@ app.get('/', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`App listening on url: http://localhost:${port}`);
+  console.log(`Server listening on url: http://localhost:${port}`);
 });

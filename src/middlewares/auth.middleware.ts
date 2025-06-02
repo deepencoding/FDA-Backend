@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import jwt, { type Secret, type JwtPayload } from "jsonwebtoken";
-
-export const SECRET_KEY: Secret = process.env.JWT_SECRET!;
+import jwt, { type JwtPayload } from "jsonwebtoken";
+import { config } from "../config/env";
 
 interface TokenPayload extends JwtPayload {
   _id: string;
@@ -20,7 +19,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       throw new Error('No token provided');
     }
 
-    const decoded = jwt.verify(token, SECRET_KEY);
+    const decoded = jwt.verify(token, config.JWT_SECRET);
     if (typeof decoded === 'string') {
       throw new Error('Invalid token format');
     };

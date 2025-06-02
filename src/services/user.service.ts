@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { insertUser, findUserByPhone, type UserRecord } from '../models/user';
-import { SECRET_KEY } from '../middlewares/auth';
+import { insertUser, findUserByPhone, type UserRecord } from '../models/user.model';
+import { config } from '../config/env';
 
 export type NewUser = {
   name: string;
@@ -38,7 +38,7 @@ export async function login({
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) throw new Error('Wrong Password');
 
-    const token = jwt.sign({ _id: user.id?.toString(), role: user.role }, SECRET_KEY, {
+    const token = jwt.sign({ _id: user.id?.toString(), role: user.role }, config.JWT_SECRET, {
       expiresIn: '7 days',
     });
 
