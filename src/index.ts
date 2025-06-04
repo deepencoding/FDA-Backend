@@ -2,6 +2,9 @@ import express from 'express';
 import { sql } from 'bun';
 import { auth } from './middlewares/auth.middleware';
 import userRouter from './routes/user.route';
+import restaurantRouter from './routes/restaurant.route';
+import orderRouter from './routes/order.route';
+import reviewRouter from './routes/review.route';
 import { config } from './config/env';
 
 const app = express();
@@ -19,6 +22,9 @@ app.use(express.json());
 
 // Public Routes
 app.use(userRouter);
+app.use(restaurantRouter);
+app.use(orderRouter);
+app.use(reviewRouter);
 
 // Auth middleware
 app.use(auth);
