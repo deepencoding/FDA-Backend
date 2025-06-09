@@ -1,4 +1,6 @@
 import { sql } from "bun";
+import type { PropertyName } from "typescript";
+import type { Restaurant } from "..";
 
 export type MenuItem = {
   id: number;
@@ -93,3 +95,17 @@ export async function updateRestaurantInfo(
   `;
   return result[0];
 } 
+
+export async function getTopRestaurants(limit: number = 7): Promise<Restaurant[]> {
+  return await sql`
+    SELECT
+      restaurant_id AS id,
+      name,
+      type,
+      rating,
+      image_url AS image
+    FROM restaurant_info
+    ORDER BY rating DESC
+    LIMIT ${limit}
+  ` as Restaurant[];
+}

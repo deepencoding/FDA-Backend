@@ -8,7 +8,7 @@ import type { OrderStatus } from '../models/order.model';
 // Create a new order
 export const createOrder = async (req: CustomRequest, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.user._id);
+    const userId = parseInt(req.user.id);
     const { restaurantId, items, deliveryAddress } = req.body;
 
     // Validate restaurant exists
@@ -88,7 +88,7 @@ export const createOrder = async (req: CustomRequest, res: Response): Promise<vo
 // Get user's orders
 export const getUserOrders = async (req: CustomRequest, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.user._id);
+    const userId = parseInt(req.user.id);
     const orders = await orderModel.getOrdersByUserId(userId);
 
     res.status(200).json({
@@ -109,7 +109,7 @@ export const getUserOrders = async (req: CustomRequest, res: Response): Promise<
 // Get restaurant's orders
 export const getRestaurantOrders = async (req: CustomRequest, res: Response): Promise<void> => {
   try {
-    const restaurantId = parseInt(req.user._id);
+    const restaurantId = parseInt(req.user.id);
     
     // Check if user is a restaurant
     if (req.user.role !== 'restaurant') {
@@ -140,7 +140,7 @@ export const getRestaurantOrders = async (req: CustomRequest, res: Response): Pr
 // Update order status (restaurant only)
 export const updateOrderStatus = async (req: CustomRequest, res: Response): Promise<void> => {
   try {
-    const restaurantId = parseInt(req.user._id);
+    const restaurantId = parseInt(req.user.id);
     const orderId = parseInt(req.params.id);
     const newStatus = req.body.status as OrderStatus;
     

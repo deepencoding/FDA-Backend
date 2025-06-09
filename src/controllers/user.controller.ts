@@ -9,13 +9,12 @@ export const loginOne = async (req: Request, res: Response): Promise<void> => {
       success: true,
       data: {
         foundUser,
-        message: 'User logged in succesfully'
       }
     });
   } catch(error) {
     res.status(500).json({
       success: false,
-      messgae: getErrorMessage(error)
+      message: getErrorMessage(error)
     });
   };
 };
