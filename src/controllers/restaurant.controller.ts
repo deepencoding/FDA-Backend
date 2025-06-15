@@ -27,7 +27,7 @@ export const updateRestaurant = async (req: CustomRequest, res: Response): Promi
     const restaurantId = parseInt(req.params.id);
     
     // Check if user is the restaurant owner
-    if (req.user._id !== restaurantId.toString() || req.user.role !== 'restaurant') {
+    if (req.user.id !== restaurantId.toString() || req.user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to update this restaurant'
@@ -64,7 +64,7 @@ export const addMenuItem = async (req: CustomRequest, res: Response): Promise<vo
     const restaurantId = parseInt(req.params.id);
     
     // Check if user is the restaurant owner
-    if (req.user._id !== restaurantId.toString() || req.user.role !== 'restaurant') {
+    if (req.user.id !== restaurantId.toString() || req.user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to add menu items'
@@ -106,7 +106,7 @@ export const updateMenuItem = async (req: CustomRequest, res: Response): Promise
     const menuItemId = parseInt(req.params.itemId);
     
     // Check if user is the restaurant owner
-    if (req.user._id !== restaurantId.toString() || req.user.role !== 'restaurant') {
+    if (req.user.id !== restaurantId.toString() || req.user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to update menu items'
@@ -155,7 +155,7 @@ export const deleteMenuItem = async (req: CustomRequest, res: Response): Promise
     const menuItemId = parseInt(req.params.itemId);
     
     // Check if user is the restaurant owner
-    if (req.user._id !== restaurantId.toString() || req.user.role !== 'restaurant') {
+    if (req.user.id !== restaurantId.toString() || req.user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to delete menu items'

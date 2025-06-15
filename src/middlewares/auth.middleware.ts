@@ -3,7 +3,7 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import { config } from "../config/env";
 
 interface TokenPayload extends JwtPayload {
-  _id: string;
+  id: number;
   role: 'user' | 'restaurant';
 }
 
