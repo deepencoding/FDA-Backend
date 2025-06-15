@@ -1,13 +1,20 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import { getErrorMessage } from '../utils/errors';
 import * as reviewModel from '../models/review.model';
 import * as restaurantModel from '../models/restaurant.model';
 import type { CustomRequest } from '../middlewares/auth.middleware';
 
 // Create a new review
-export const createReview = async (req: CustomRequest, res: Response): Promise<void> => {
+export const createReview = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.user.id);
+    const userId = (req as CustomRequest).user.id;
+    if (!req.params.restaurantId) {
+      res.status(400).json({
+        success: false,
+        message: 'Restaurant id not found.'
+      });
+      return;
+    }
     const restaurantId = parseInt(req.params.restaurantId);
     const { rating, comment } = req.body;
 
@@ -63,8 +70,15 @@ export const createReview = async (req: CustomRequest, res: Response): Promise<v
 };
 
 // Get reviews for a restaurant
-export const getRestaurantReviews = async (req: CustomRequest, res: Response): Promise<void> => {
+export const getRestaurantReviews = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.params.restaurantId) {
+      res.status(400).json({
+        success: false,
+        message: 'Restaurant id not found.'
+      });
+      return;
+    }
     const restaurantId = parseInt(req.params.restaurantId);
 
     // Check if restaurant exists
@@ -95,9 +109,9 @@ export const getRestaurantReviews = async (req: CustomRequest, res: Response): P
 };
 
 // Get user's reviews
-export const getUserReviews = async (req: CustomRequest, res: Response): Promise<void> => {
+export const getUserReviews = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.user.id);
+    const userId = (req as CustomRequest).user.id;
     const reviews = await reviewModel.getUserReviews(userId);
 
     res.status(200).json({
@@ -116,9 +130,16 @@ export const getUserReviews = async (req: CustomRequest, res: Response): Promise
 };
 
 // Update review
-export const updateReview = async (req: CustomRequest, res: Response): Promise<void> => {
+export const updateReview = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.user.id);
+    const userId = (req as CustomRequest).user.id;
+    if (!req.params.id) {
+      res.status(400).json({
+        success: false,
+        message: 'Review id not found.'
+      });
+      return;
+    }
     const reviewId = parseInt(req.params.id);
     const { rating, comment } = req.body;
 
@@ -162,9 +183,16 @@ export const updateReview = async (req: CustomRequest, res: Response): Promise<v
 };
 
 // Delete review
-export const deleteReview = async (req: CustomRequest, res: Response): Promise<void> => {
+export const deleteReview = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.user.id);
+    const userId = (req as CustomRequest).user.id;
+    if (!req.params.id) {
+      res.status(400).json({
+        success: false,
+        message: 'Review id not found.'
+      });
+      return;
+    }
     const reviewId = parseInt(req.params.id);
 
     const deleted = await reviewModel.deleteReview(reviewId, userId);
@@ -189,4 +217,4 @@ export const deleteReview = async (req: CustomRequest, res: Response): Promise<v
       message: getErrorMessage(error)
     });
   }
-}; 
+};

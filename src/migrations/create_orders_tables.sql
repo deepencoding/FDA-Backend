@@ -24,4 +24,4 @@ CREATE TABLE IF NOT EXISTS order_items (
     special_instructions TEXT,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE RESTRICT
-); 
+);

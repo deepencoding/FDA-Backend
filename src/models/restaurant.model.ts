@@ -1,5 +1,4 @@
 import { sql } from "bun";
-import type { PropertyName } from "typescript";
 import type { Restaurant } from "..";
 
 export type MenuItem = {
@@ -15,18 +14,18 @@ export type MenuItem = {
 };
 
 // Create menu item
-export async function createMenuItem(menuItem: Omit<MenuItem, 'id' | 'created_at'>): Promise<MenuItem> {
-  const result = await sql<MenuItem[]>`
+export async function createMenuItem(menuItem: Omit<MenuItem, 'id' | 'created_at'>): Promise<MenuItem | null> {
+  const result: MenuItem[] = await sql`
     INSERT INTO menu_items ${sql(menuItem)}
     RETURNING *
   `;
-  return result[0];
+  return result[0] || null;
 }
 
 // Get menu items by restaurant
 export async function getMenuItems(restaurant_id: number): Promise<MenuItem[]> {
-  return await sql<MenuItem[]>`
-    SELECT * FROM menu_items 
+  return await sql`
+    SELECT * FROM menu_items
     WHERE restaurant_id = ${restaurant_id}
     AND is_available = true
     ORDER BY category, name
@@ -39,8 +38,8 @@ export async function updateMenuItem(
   restaurant_id: number,
   updates: Partial<MenuItem>
 ): Promise<MenuItem | null> {
-  const result = await sql<MenuItem[]>`
-    UPDATE menu_items 
+  const result: MenuItem[] = await sql`
+    UPDATE menu_items =
     SET ${sql(updates)}
     WHERE id = ${id} AND restaurant_id = ${restaurant_id}
     RETURNING *
@@ -50,8 +49,8 @@ export async function updateMenuItem(
 
 // Delete menu item
 export async function deleteMenuItem(id: number, restaurant_id: number): Promise<boolean> {
-  const result = await sql<MenuItem[]>`
-    DELETE FROM menu_items 
+  const result: MenuItem[] = await sql`
+    DELETE FROM menu_items
     WHERE id = ${id} AND restaurant_id = ${restaurant_id}
     RETURNING id
   `;
@@ -64,7 +63,7 @@ export async function getRestaurantWithMenu(restaurant_id: number): Promise<{
   menu_items: MenuItem[];
 }> {
   const restaurant = await sql`
-    SELECT r.*, u.name as owner_name 
+    SELECT r.*, u.name as owner_name
     FROM restaurant_info r
     JOIN users u ON u.id = r.restaurant_id
     WHERE r.restaurant_id = ${restaurant_id}
@@ -88,13 +87,13 @@ export async function updateRestaurantInfo(
   }
 ): Promise<any> {
   const result = await sql`
-    UPDATE restaurant_info 
+    UPDATE restaurant_info
     SET ${sql(updates)}
     WHERE restaurant_id = ${restaurant_id}
     RETURNING *
   `;
   return result[0];
-} 
+}
 
 export async function getTopRestaurants(limit: number = 7): Promise<Restaurant[]> {
   return await sql`

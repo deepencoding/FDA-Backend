@@ -1,4 +1,4 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import { getErrorMessage } from '../utils/errors';
 import * as orderModel from '../models/order.model';
 import * as restaurantModel from '../models/restaurant.model';
@@ -6,9 +6,9 @@ import type { CustomRequest } from '../middlewares/auth.middleware';
 import type { OrderStatus } from '../models/order.model';
 
 // Create a new order
-export const createOrder = async (req: CustomRequest, res: Response): Promise<void> => {
+export const createOrder = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.user.id);
+    const userId = (req as CustomRequest).user.id;
     const { restaurantId, items, deliveryAddress } = req.body;
 
     // Validate restaurant exists
@@ -86,9 +86,9 @@ export const createOrder = async (req: CustomRequest, res: Response): Promise<vo
 };
 
 // Get user's orders
-export const getUserOrders = async (req: CustomRequest, res: Response): Promise<void> => {
+export const getUserOrders = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.user.id);
+    const userId = (req as CustomRequest).user.id;
     const orders = await orderModel.getOrdersByUserId(userId);
 
     res.status(200).json({
@@ -107,12 +107,12 @@ export const getUserOrders = async (req: CustomRequest, res: Response): Promise<
 };
 
 // Get restaurant's orders
-export const getRestaurantOrders = async (req: CustomRequest, res: Response): Promise<void> => {
+export const getRestaurantOrders = async (req: Request, res: Response): Promise<void> => {
   try {
-    const restaurantId = parseInt(req.user.id);
-    
+    const restaurantId = (req as CustomRequest).user.id;
+
     // Check if user is a restaurant
-    if (req.user.role !== 'restaurant') {
+    if ((req as CustomRequest).user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to view restaurant orders'
@@ -138,14 +138,22 @@ export const getRestaurantOrders = async (req: CustomRequest, res: Response): Pr
 };
 
 // Update order status (restaurant only)
-export const updateOrderStatus = async (req: CustomRequest, res: Response): Promise<void> => {
+export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const restaurantId = parseInt(req.user.id);
+    const restaurantId = (req as CustomRequest).user.id;
+
+    if (!req.params.id) {
+      res.status(401).json({
+        success: false,
+        message: 'Order id not found.'
+      });
+      return;
+    }
     const orderId = parseInt(req.params.id);
     const newStatus = req.body.status as OrderStatus;
-    
+
     // Check if user is a restaurant
-    if (req.user.role !== 'restaurant') {
+    if ((req as CustomRequest).user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to update order status'
@@ -164,7 +172,7 @@ export const updateOrderStatus = async (req: CustomRequest, res: Response): Prom
     }
 
     const updatedOrder = await orderModel.updateOrderStatus(orderId, restaurantId, newStatus);
-    
+
     if (!updatedOrder) {
       res.status(404).json({
         success: false,
@@ -186,4 +194,4 @@ export const updateOrderStatus = async (req: CustomRequest, res: Response): Prom
       message: getErrorMessage(error)
     });
   }
-}; 
+};

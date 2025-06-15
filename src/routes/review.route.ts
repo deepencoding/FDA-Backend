@@ -20,4 +20,4 @@ router.get('/reviews/user', getUserReviews);
 router.put('/reviews/:id', updateReview);
 router.delete('/reviews/:id', deleteReview);
 
-export default router; 
+export const reviewRouter = router;

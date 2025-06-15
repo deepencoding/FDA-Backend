@@ -37,10 +37,15 @@ export async function createOrder(
   // Start a transaction
   return await sql.transaction(async (tx) => {
     // Create the order
-    const [order] = await tx<Order[]>`
+    const [order]: Order[] = await tx`
       INSERT INTO orders ${sql(orderData)}
       RETURNING *
     `;
+
+    // TODO: handle this how you want
+    if (!order) {
+      return;
+    }
 
     // Create order items
     for (const item of items) {
@@ -60,8 +65,8 @@ export async function createOrder(
 
 // Get order by ID with items
 export async function getOrderById(orderId: number): Promise<OrderWithItems | null> {
-  const orders = await sql<OrderWithItems[]>`
-    SELECT 
+  const orders: OrderWithItems[] = await sql`
+    SELECT
       o.*,
       r.name as restaurant_name,
       json_agg(
@@ -95,8 +100,8 @@ export async function getOrderById(orderId: number): Promise<OrderWithItems | nu
 
 // Get orders by user ID
 export async function getOrdersByUserId(userId: number): Promise<OrderWithItems[]> {
-  return await sql<OrderWithItems[]>`
-    SELECT 
+  return await sql`
+    SELECT
       o.*,
       r.name as restaurant_name,
       json_agg(
@@ -124,13 +129,13 @@ export async function getOrdersByUserId(userId: number): Promise<OrderWithItems[
     WHERE o.user_id = ${userId}
     GROUP BY o.id, r.name
     ORDER BY o.created_at DESC
-  `;
+  ` as OrderWithItems[];
 }
 
 // Get orders by restaurant ID
 export async function getOrdersByRestaurantId(restaurantId: number): Promise<OrderWithItems[]> {
-  return await sql<OrderWithItems[]>`
-    SELECT 
+  return await sql`
+    SELECT
       o.*,
       r.name as restaurant_name,
       json_agg(
@@ -157,8 +162,8 @@ export async function getOrdersByRestaurantId(restaurantId: number): Promise<Ord
     JOIN menu_items mi ON mi.id = oi.menu_item_id
     WHERE o.restaurant_id = ${restaurantId}
     GROUP BY o.id, r.name
-    ORDER BY 
-      CASE 
+    ORDER BY
+      CASE
         WHEN o.status = 'pending' THEN 1
         WHEN o.status = 'confirmed' THEN 2
         WHEN o.status = 'preparing' THEN 3
@@ -167,7 +172,7 @@ export async function getOrdersByRestaurantId(restaurantId: number): Promise<Ord
         ELSE 6
       END,
       o.created_at DESC
-  `;
+  ` as OrderWithItems[];
 }
 
 // Update order status
@@ -176,13 +181,13 @@ export async function updateOrderStatus(
   restaurantId: number,
   status: OrderStatus
 ): Promise<Order | null> {
-  const result = await sql<Order[]>`
+  const result: Order[] = await sql`
     UPDATE orders
-    SET 
+    SET
       status = ${status},
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ${orderId} AND restaurant_id = ${restaurantId}
     RETURNING *
   `;
   return result[0] || null;
-} 
+}

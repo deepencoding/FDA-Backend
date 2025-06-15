@@ -6,9 +6,16 @@ import type { CustomRequest } from '../middlewares/auth.middleware';
 // Get restaurant details with menu
 export const getRestaurantDetails = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.params.id) {
+      res.status(400).json({
+        success: false,
+        message: 'Restaurant id not found.'
+      });
+      return;
+    }
     const restaurantId = parseInt(req.params.id);
     const data = await restaurantModel.getRestaurantWithMenu(restaurantId);
-    
+
     res.status(200).json({
       success: true,
       data
@@ -22,12 +29,19 @@ export const getRestaurantDetails = async (req: Request, res: Response): Promise
 };
 
 // Update restaurant info (protected - only restaurant owner)
-export const updateRestaurant = async (req: CustomRequest, res: Response): Promise<void> => {
+export const updateRestaurant = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.params.id) {
+      res.status(400).json({
+        success: false,
+        message: 'Restaurant id not found.'
+      });
+      return;
+    }
     const restaurantId = parseInt(req.params.id);
-    
+
     // Check if user is the restaurant owner
-    if (req.user.id !== restaurantId.toString() || req.user.role !== 'restaurant') {
+    if ((req as CustomRequest).user.id !== restaurantId || (req as CustomRequest).user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to update this restaurant'
@@ -42,7 +56,7 @@ export const updateRestaurant = async (req: CustomRequest, res: Response): Promi
     };
 
     const updatedRestaurant = await restaurantModel.updateRestaurantInfo(restaurantId, updates);
-    
+
     res.status(200).json({
       success: true,
       data: {
@@ -59,12 +73,19 @@ export const updateRestaurant = async (req: CustomRequest, res: Response): Promi
 };
 
 // Add menu item (protected - only restaurant owner)
-export const addMenuItem = async (req: CustomRequest, res: Response): Promise<void> => {
+export const addMenuItem = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.params.id) {
+      res.status(400).json({
+        success: false,
+        message: 'Restaurant id not found.'
+      });
+      return;
+    }
     const restaurantId = parseInt(req.params.id);
-    
+
     // Check if user is the restaurant owner
-    if (req.user.id !== restaurantId.toString() || req.user.role !== 'restaurant') {
+    if ((req as CustomRequest).user.id !== restaurantId || (req as CustomRequest).user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to add menu items'
@@ -83,7 +104,7 @@ export const addMenuItem = async (req: CustomRequest, res: Response): Promise<vo
     };
 
     const newMenuItem = await restaurantModel.createMenuItem(menuItem);
-    
+
     res.status(201).json({
       success: true,
       data: {
@@ -100,13 +121,28 @@ export const addMenuItem = async (req: CustomRequest, res: Response): Promise<vo
 };
 
 // Update menu item (protected - only restaurant owner)
-export const updateMenuItem = async (req: CustomRequest, res: Response): Promise<void> => {
+export const updateMenuItem = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.params.id) {
+      res.status(400).json({
+        success: false,
+        message: 'Restaurant id not found.'
+      });
+      return;
+    }
     const restaurantId = parseInt(req.params.id);
+
+    if (!req.params.itemId) {
+      res.status(400).json({
+        success: false,
+        message: 'Menu item id not found.'
+      });
+      return;
+    }
     const menuItemId = parseInt(req.params.itemId);
-    
+
     // Check if user is the restaurant owner
-    if (req.user.id !== restaurantId.toString() || req.user.role !== 'restaurant') {
+    if ((req as CustomRequest).user.id !== restaurantId || (req as CustomRequest).user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to update menu items'
@@ -124,7 +160,7 @@ export const updateMenuItem = async (req: CustomRequest, res: Response): Promise
     };
 
     const updatedMenuItem = await restaurantModel.updateMenuItem(menuItemId, restaurantId, updates);
-    
+
     if (!updatedMenuItem) {
       res.status(404).json({
         success: false,
@@ -149,13 +185,28 @@ export const updateMenuItem = async (req: CustomRequest, res: Response): Promise
 };
 
 // Delete menu item (protected - only restaurant owner)
-export const deleteMenuItem = async (req: CustomRequest, res: Response): Promise<void> => {
+export const deleteMenuItem = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.params.id) {
+      res.status(400).json({
+        success: false,
+        message: 'Restaurant id not found.'
+      });
+      return;
+    }
     const restaurantId = parseInt(req.params.id);
+
+    if (!req.params.itemId) {
+      res.status(400).json({
+        success: false,
+        message: 'Menu item id not found.'
+      });
+      return;
+    }
     const menuItemId = parseInt(req.params.itemId);
-    
+
     // Check if user is the restaurant owner
-    if (req.user.id !== restaurantId.toString() || req.user.role !== 'restaurant') {
+    if ((req as CustomRequest).user.id !== restaurantId || (req as CustomRequest).user.role !== 'restaurant') {
       res.status(403).json({
         success: false,
         message: 'Not authorized to delete menu items'
@@ -164,7 +215,7 @@ export const deleteMenuItem = async (req: CustomRequest, res: Response): Promise
     }
 
     const deleted = await restaurantModel.deleteMenuItem(menuItemId, restaurantId);
-    
+
     if (!deleted) {
       res.status(404).json({
         success: false,
@@ -185,4 +236,4 @@ export const deleteMenuItem = async (req: CustomRequest, res: Response): Promise
       message: getErrorMessage(error)
     });
   }
-}; 
+};

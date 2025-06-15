@@ -20,4 +20,4 @@ router.get('/orders/user', getUserOrders);
 router.get('/orders/restaurant', getRestaurantOrders);
 router.put('/orders/:id/status', updateOrderStatus);
 
-export default router; 
+export const orderRouter = router;

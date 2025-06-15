@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (restaurant_id) REFERENCES restaurant_info(restaurant_id) ON DELETE CASCADE,
     -- Ensure one review per user per restaurant
     UNIQUE (user_id, restaurant_id)
-); 
+);

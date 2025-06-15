@@ -20,4 +20,4 @@ router.post('/restaurants/:id/menu', addMenuItem);
 router.put('/restaurants/:id/menu/:itemId', updateMenuItem);
 router.delete('/restaurants/:id/menu/:itemId', deleteMenuItem);
 
-export default router; 
+export const restaurantRouter = router;

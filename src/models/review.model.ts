@@ -20,7 +20,7 @@ export async function createReview(
 ): Promise<Review> {
   return await sql.transaction(async (tx) => {
     // Create the review
-    const [review] = await tx<Review[]>`
+    const [review]: Review[] = await tx`
       INSERT INTO reviews ${sql(reviewData)}
       RETURNING *
     `;
@@ -42,7 +42,7 @@ export async function createReview(
 
 // Get reviews by restaurant ID
 export async function getReviewsByRestaurantId(restaurantId: number): Promise<ReviewWithUser[]> {
-  return await sql<ReviewWithUser[]>`
+  return await sql`
     SELECT r.*, u.name as user_name
     FROM reviews r
     JOIN users u ON u.id = r.user_id
@@ -53,7 +53,7 @@ export async function getReviewsByRestaurantId(restaurantId: number): Promise<Re
 
 // Get review by ID
 export async function getReviewById(reviewId: number): Promise<ReviewWithUser | null> {
-  const reviews = await sql<ReviewWithUser[]>`
+  const reviews: ReviewWithUser[] = await sql`
     SELECT r.*, u.name as user_name
     FROM reviews r
     JOIN users u ON u.id = r.user_id
@@ -73,7 +73,7 @@ export async function updateReview(
 ): Promise<Review | null> {
   return await sql.transaction(async (tx) => {
     // Update the review
-    const [review] = await tx<Review[]>`
+    const [review]: Review[] = await tx`
       UPDATE reviews
       SET ${sql(updates)}, updated_at = CURRENT_TIMESTAMP
       WHERE id = ${reviewId} AND user_id = ${userId}
@@ -101,7 +101,7 @@ export async function updateReview(
 export async function deleteReview(reviewId: number, userId: number): Promise<boolean> {
   return await sql.transaction(async (tx) => {
     // Get the review first to know the restaurant_id
-    const [review] = await tx<Review[]>`
+    const [review]: Review[] = await tx`
       SELECT * FROM reviews
       WHERE id = ${reviewId} AND user_id = ${userId}
     `;
@@ -131,11 +131,11 @@ export async function deleteReview(reviewId: number, userId: number): Promise<bo
 
 // Get user's reviews
 export async function getUserReviews(userId: number): Promise<ReviewWithUser[]> {
-  return await sql<ReviewWithUser[]>`
+  return await sql`
     SELECT r.*, u.name as user_name
     FROM reviews r
     JOIN users u ON u.id = r.user_id
     WHERE r.user_id = ${userId}
     ORDER BY r.created_at DESC
   `;
-} 
+}

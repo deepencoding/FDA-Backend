@@ -1,8 +1,8 @@
 import express from 'express';
 import { userRouter } from './routes/user.route';
-import restaurantRouter from './routes/restaurant.route';
-import orderRouter from './routes/order.route';
-import reviewRouter from './routes/review.route';
+import { restaurantRouter } from './routes/restaurant.route';
+import { orderRouter } from './routes/order.route';
+import { reviewRouter } from './routes/review.route';
 import { config } from './config/env';
 import { homeRouter } from './routes/home.router';
 import { cartRouter } from './routes/cart.route';
