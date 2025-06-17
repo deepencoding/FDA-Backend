@@ -113,7 +113,7 @@ MIT License – see [LICENSE](./LICENSE) for details.
 
 ## 🙋‍♂️ Author
 
-**@deepencoding** – committed to scalable, performant backend architectures using modern TypeScript runtimes. Happy to discuss the impact of Bun or PostgreSQL best practices!
+**@deepencoding** & **@abm-builds**– committed to scalable, performant backend architectures using modern TypeScript runtimes. Happy to discuss the impact of Bun or PostgreSQL best practices!
 
 ---
 
