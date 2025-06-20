@@ -57,6 +57,15 @@ export async function deleteMenuItem(id: number, restaurant_id: number): Promise
   return result.length > 0;
 }
 
+// Get menu item by ID
+export async function getMenuItemById(id: number): Promise<MenuItem | null> {
+  const result: MenuItem[] = await sql`
+    SELECT * FROM menu_items
+    WHERE id = ${id}
+  `;
+  return result[0] || null;
+}
+
 // Get restaurant details with menu items
 export async function getRestaurantWithMenu(restaurant_id: number): Promise<{
   restaurant: any;

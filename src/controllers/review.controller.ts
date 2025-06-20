@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { getErrorMessage } from '../utils/errors';
-import * as reviewModel from '../models/review.model';
-import * as restaurantModel from '../models/restaurant.model';
+import * as reviewService from '../services/review.service';
 import type { CustomRequest } from '../middlewares/auth.middleware';
 
 // Create a new review
@@ -18,32 +17,7 @@ export const createReview = async (req: Request, res: Response): Promise<void> =
     const restaurantId = parseInt(req.params.restaurantId);
     const { rating, comment } = req.body;
 
-    // Validate rating
-    if (rating < 1 || rating > 5) {
-      res.status(400).json({
-        success: false,
-        message: 'Rating must be between 1 and 5'
-      });
-      return;
-    }
-
-    // Check if restaurant exists
-    const restaurant = await restaurantModel.getRestaurantWithMenu(restaurantId);
-    if (!restaurant) {
-      res.status(404).json({
-        success: false,
-        message: 'Restaurant not found'
-      });
-      return;
-    }
-
-    // Create review
-    const review = await reviewModel.createReview({
-      user_id: userId,
-      restaurant_id: restaurantId,
-      rating,
-      comment
-    });
+    const review = await reviewService.createReview(userId, restaurantId, rating, comment);
 
     res.status(201).json({
       success: true,
@@ -52,17 +26,8 @@ export const createReview = async (req: Request, res: Response): Promise<void> =
         message: 'Review created successfully'
       }
     });
-  } catch (error) {
-    // Handle unique constraint violation
-    if (error instanceof Error && error.message.includes('unique constraint')) {
-      res.status(400).json({
-        success: false,
-        message: 'You have already reviewed this restaurant'
-      });
-      return;
-    }
-
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -81,17 +46,7 @@ export const getRestaurantReviews = async (req: Request, res: Response): Promise
     }
     const restaurantId = parseInt(req.params.restaurantId);
 
-    // Check if restaurant exists
-    const restaurant = await restaurantModel.getRestaurantWithMenu(restaurantId);
-    if (!restaurant) {
-      res.status(404).json({
-        success: false,
-        message: 'Restaurant not found'
-      });
-      return;
-    }
-
-    const reviews = await reviewModel.getReviewsByRestaurantId(restaurantId);
+    const reviews = await reviewService.getRestaurantReviews(restaurantId);
 
     res.status(200).json({
       success: true,
@@ -100,8 +55,8 @@ export const getRestaurantReviews = async (req: Request, res: Response): Promise
         message: 'Reviews retrieved successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -112,7 +67,7 @@ export const getRestaurantReviews = async (req: Request, res: Response): Promise
 export const getUserReviews = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as CustomRequest).user.id;
-    const reviews = await reviewModel.getUserReviews(userId);
+    const reviews = await reviewService.getUserReviews(userId);
 
     res.status(200).json({
       success: true,
@@ -143,29 +98,12 @@ export const updateReview = async (req: Request, res: Response): Promise<void> =
     const reviewId = parseInt(req.params.id);
     const { rating, comment } = req.body;
 
-    // Validate rating if provided
-    if (rating !== undefined && (rating < 1 || rating > 5)) {
-      res.status(400).json({
-        success: false,
-        message: 'Rating must be between 1 and 5'
-      });
-      return;
-    }
-
     const updates = {
       ...(rating !== undefined && { rating }),
       ...(comment !== undefined && { comment })
     };
 
-    const updatedReview = await reviewModel.updateReview(reviewId, userId, updates);
-
-    if (!updatedReview) {
-      res.status(404).json({
-        success: false,
-        message: 'Review not found or not authorized to update'
-      });
-      return;
-    }
+    const updatedReview = await reviewService.updateReview(reviewId, userId, updates);
 
     res.status(200).json({
       success: true,
@@ -174,8 +112,8 @@ export const updateReview = async (req: Request, res: Response): Promise<void> =
         message: 'Review updated successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -195,15 +133,7 @@ export const deleteReview = async (req: Request, res: Response): Promise<void> =
     }
     const reviewId = parseInt(req.params.id);
 
-    const deleted = await reviewModel.deleteReview(reviewId, userId);
-
-    if (!deleted) {
-      res.status(404).json({
-        success: false,
-        message: 'Review not found or not authorized to delete'
-      });
-      return;
-    }
+    await reviewService.deleteReview(reviewId, userId);
 
     res.status(200).json({
       success: true,
@@ -211,8 +141,8 @@ export const deleteReview = async (req: Request, res: Response): Promise<void> =
         message: 'Review deleted successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });

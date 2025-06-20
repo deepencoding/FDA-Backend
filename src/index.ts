@@ -6,6 +6,7 @@ import { reviewRouter } from './routes/review.route';
 import { config } from './config/env';
 import { homeRouter } from './routes/home.router';
 import { cartRouter } from './routes/cart.route';
+import { itemRouter } from './routes/item.route';
 
 const app = express();
 const port = config.PORT || 3000;
@@ -33,6 +34,7 @@ app.use(restaurantRouter);
 app.use(orderRouter);
 app.use(reviewRouter);
 app.use(cartRouter);
+app.use(itemRouter);
 
 app.listen(port, () => {
   console.log(`Server listening on url: http://localhost:${port}`);

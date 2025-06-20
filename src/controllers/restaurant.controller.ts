@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { getErrorMessage } from '../utils/errors';
-import * as restaurantModel from '../models/restaurant.model';
+import * as restaurantService from '../services/restaurant.service';
 import type { CustomRequest } from '../middlewares/auth.middleware';
 
 // Get restaurant details with menu
@@ -14,7 +14,7 @@ export const getRestaurantDetails = async (req: Request, res: Response): Promise
       return;
     }
     const restaurantId = parseInt(req.params.id);
-    const data = await restaurantModel.getRestaurantWithMenu(restaurantId);
+    const data = await restaurantService.getRestaurantDetails(restaurantId);
 
     res.status(200).json({
       success: true,
@@ -40,22 +40,17 @@ export const updateRestaurant = async (req: Request, res: Response): Promise<voi
     }
     const restaurantId = parseInt(req.params.id);
 
-    // Check if user is the restaurant owner
-    if ((req as CustomRequest).user.id !== restaurantId || (req as CustomRequest).user.role !== 'restaurant') {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this restaurant'
-      });
-      return;
-    }
-
     const updates = {
       type: req.body.type,
       image_url: req.body.image_url,
       address: req.body.address
     };
 
-    const updatedRestaurant = await restaurantModel.updateRestaurantInfo(restaurantId, updates);
+    const updatedRestaurant = await restaurantService.updateRestaurant(
+      restaurantId,
+      (req as CustomRequest).user,
+      updates
+    );
 
     res.status(200).json({
       success: true,
@@ -64,8 +59,8 @@ export const updateRestaurant = async (req: Request, res: Response): Promise<voi
         message: 'Restaurant updated successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -84,26 +79,19 @@ export const addMenuItem = async (req: Request, res: Response): Promise<void> =>
     }
     const restaurantId = parseInt(req.params.id);
 
-    // Check if user is the restaurant owner
-    if ((req as CustomRequest).user.id !== restaurantId || (req as CustomRequest).user.role !== 'restaurant') {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to add menu items'
-      });
-      return;
-    }
-
-    const menuItem = {
-      restaurant_id: restaurantId,
+    const menuItemData = {
       name: req.body.name,
       description: req.body.description,
       price: req.body.price,
       image_url: req.body.image_url,
       category: req.body.category,
-      is_available: true
     };
 
-    const newMenuItem = await restaurantModel.createMenuItem(menuItem);
+    const newMenuItem = await restaurantService.addMenuItem(
+      restaurantId,
+      (req as CustomRequest).user,
+      menuItemData
+    );
 
     res.status(201).json({
       success: true,
@@ -112,8 +100,8 @@ export const addMenuItem = async (req: Request, res: Response): Promise<void> =>
         message: 'Menu item added successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -141,15 +129,6 @@ export const updateMenuItem = async (req: Request, res: Response): Promise<void>
     }
     const menuItemId = parseInt(req.params.itemId);
 
-    // Check if user is the restaurant owner
-    if ((req as CustomRequest).user.id !== restaurantId || (req as CustomRequest).user.role !== 'restaurant') {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to update menu items'
-      });
-      return;
-    }
-
     const updates = {
       name: req.body.name,
       description: req.body.description,
@@ -159,15 +138,12 @@ export const updateMenuItem = async (req: Request, res: Response): Promise<void>
       is_available: req.body.is_available
     };
 
-    const updatedMenuItem = await restaurantModel.updateMenuItem(menuItemId, restaurantId, updates);
-
-    if (!updatedMenuItem) {
-      res.status(404).json({
-        success: false,
-        message: 'Menu item not found'
-      });
-      return;
-    }
+    const updatedMenuItem = await restaurantService.updateMenuItem(
+      restaurantId,
+      menuItemId,
+      (req as CustomRequest).user,
+      updates
+    );
 
     res.status(200).json({
       success: true,
@@ -176,8 +152,8 @@ export const updateMenuItem = async (req: Request, res: Response): Promise<void>
         message: 'Menu item updated successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -205,24 +181,11 @@ export const deleteMenuItem = async (req: Request, res: Response): Promise<void>
     }
     const menuItemId = parseInt(req.params.itemId);
 
-    // Check if user is the restaurant owner
-    if ((req as CustomRequest).user.id !== restaurantId || (req as CustomRequest).user.role !== 'restaurant') {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete menu items'
-      });
-      return;
-    }
-
-    const deleted = await restaurantModel.deleteMenuItem(menuItemId, restaurantId);
-
-    if (!deleted) {
-      res.status(404).json({
-        success: false,
-        message: 'Menu item not found'
-      });
-      return;
-    }
+    await restaurantService.deleteMenuItem(
+      restaurantId,
+      menuItemId,
+      (req as CustomRequest).user
+    );
 
     res.status(200).json({
       success: true,
@@ -230,8 +193,8 @@ export const deleteMenuItem = async (req: Request, res: Response): Promise<void>
         message: 'Menu item deleted successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });

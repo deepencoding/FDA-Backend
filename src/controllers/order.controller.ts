@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { getErrorMessage } from '../utils/errors';
-import * as orderModel from '../models/order.model';
-import * as restaurantModel from '../models/restaurant.model';
+import * as orderService from '../services/order.service';
 import type { CustomRequest } from '../middlewares/auth.middleware';
 import type { OrderStatus } from '../models/order.model';
 
@@ -11,64 +10,12 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     const userId = (req as CustomRequest).user.id;
     const { restaurantId, items, deliveryAddress } = req.body;
 
-    // Validate restaurant exists
-    const restaurant = await restaurantModel.getRestaurantWithMenu(restaurantId);
-    if (!restaurant) {
-      res.status(404).json({
-        success: false,
-        message: 'Restaurant not found'
-      });
-      return;
-    }
-
-    // Calculate total amount and validate menu items
-    let totalAmount = 0;
-    const orderItems = [];
-    const menuItemsMap = new Map(restaurant.menu_items.map(item => [item.id, item]));
-
-    for (const item of items) {
-      const menuItem = menuItemsMap.get(item.menuItemId);
-      if (!menuItem) {
-        res.status(400).json({
-          success: false,
-          message: `Menu item ${item.menuItemId} not found`
-        });
-        return;
-      }
-
-      if (!menuItem.is_available) {
-        res.status(400).json({
-          success: false,
-          message: `Menu item ${menuItem.name} is not available`
-        });
-        return;
-      }
-
-      const itemTotal = menuItem.price * item.quantity;
-      totalAmount += itemTotal;
-
-      orderItems.push({
-        menu_item_id: item.menuItemId,
-        quantity: item.quantity,
-        unit_price: menuItem.price,
-        special_instructions: item.specialInstructions
-      });
-    }
-
-    // Create order
-    const order = await orderModel.createOrder(
-      {
-        user_id: userId,
-        restaurant_id: restaurantId,
-        status: 'pending',
-        total_amount: totalAmount,
-        delivery_address: deliveryAddress
-      },
-      orderItems
+    const orderWithItems = await orderService.createOrder(
+      userId,
+      restaurantId,
+      items,
+      deliveryAddress
     );
-
-    // Get full order details
-    const orderWithItems = await orderModel.getOrderById(order.id);
 
     res.status(201).json({
       success: true,
@@ -77,8 +24,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         message: 'Order created successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -89,7 +36,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 export const getUserOrders = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as CustomRequest).user.id;
-    const orders = await orderModel.getOrdersByUserId(userId);
+    const orders = await orderService.getUserOrders(userId);
 
     res.status(200).json({
       success: true,
@@ -110,17 +57,9 @@ export const getUserOrders = async (req: Request, res: Response): Promise<void> 
 export const getRestaurantOrders = async (req: Request, res: Response): Promise<void> => {
   try {
     const restaurantId = (req as CustomRequest).user.id;
+    const userRole = (req as CustomRequest).user.role;
 
-    // Check if user is a restaurant
-    if ((req as CustomRequest).user.role !== 'restaurant') {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to view restaurant orders'
-      });
-      return;
-    }
-
-    const orders = await orderModel.getOrdersByRestaurantId(restaurantId);
+    const orders = await orderService.getRestaurantOrders(restaurantId, userRole);
 
     res.status(200).json({
       success: true,
@@ -129,8 +68,8 @@ export const getRestaurantOrders = async (req: Request, res: Response): Promise<
         message: 'Orders retrieved successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -141,6 +80,7 @@ export const getRestaurantOrders = async (req: Request, res: Response): Promise<
 export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
   try {
     const restaurantId = (req as CustomRequest).user.id;
+    const userRole = (req as CustomRequest).user.role;
 
     if (!req.params.id) {
       res.status(401).json({
@@ -152,34 +92,12 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
     const orderId = parseInt(req.params.id);
     const newStatus = req.body.status as OrderStatus;
 
-    // Check if user is a restaurant
-    if ((req as CustomRequest).user.role !== 'restaurant') {
-      res.status(403).json({
-        success: false,
-        message: 'Not authorized to update order status'
-      });
-      return;
-    }
-
-    // Validate status transition
-    const validStatuses: OrderStatus[] = ['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'];
-    if (!validStatuses.includes(newStatus)) {
-      res.status(400).json({
-        success: false,
-        message: 'Invalid order status'
-      });
-      return;
-    }
-
-    const updatedOrder = await orderModel.updateOrderStatus(orderId, restaurantId, newStatus);
-
-    if (!updatedOrder) {
-      res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-      return;
-    }
+    const updatedOrder = await orderService.updateOrderStatus(
+      orderId,
+      restaurantId,
+      userRole,
+      newStatus
+    );
 
     res.status(200).json({
       success: true,
@@ -188,8 +106,8 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
         message: 'Order status updated successfully'
       }
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    res.status(error.status || 500).json({
       success: false,
       message: getErrorMessage(error)
     });
