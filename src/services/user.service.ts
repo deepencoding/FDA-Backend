@@ -12,7 +12,7 @@ export type NewUser = {
 
 const saltRounds = 10;
 
-export async function register(user: NewUser): Promise<void> {
+export async function register(user: NewUser): Promise<{token: string}> {
   const hashedPassword = await bcrypt.hash(user.password, saltRounds);
   try {
     await insertUser({
@@ -21,6 +21,7 @@ export async function register(user: NewUser): Promise<void> {
       password_hash: hashedPassword,
       role: user.role
     });
+		return login({ phone_no: user.phone_no, password: user.password });
   } catch(error) {
     throw error;
   };
@@ -30,7 +31,7 @@ export async function login({
   phone_no, password
 }: {
   phone_no: string; password: string;
-}): Promise<{user: Omit<UserRecord, 'password_hash'>; token: string}> {
+}): Promise<{token: string}> {
   try {
     const user: UserRecord | undefined = await findUserByPhone(phone_no);
     if (!user) throw new Error('User not found');
@@ -42,8 +43,9 @@ export async function login({
       expiresIn: '7 days',
     });
 
-    const { password_hash, ...safeUser } = user;
-    return { user: safeUser, token: token };
+    return {
+      token: token
+    };
   } catch (error) {
     throw error;
   };
