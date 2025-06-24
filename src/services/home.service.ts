@@ -25,7 +25,8 @@ export async function fetchHomePageData(): Promise<HomePage> {
       name: r.name,
       type: r.type,
       rating: r.rating,
-      image: r.image
+      image: r.image,
+			deliveryFee: r.deliveryFee
     }))
   };
 }

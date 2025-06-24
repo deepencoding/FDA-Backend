@@ -5,30 +5,30 @@ import { getHomePageData } from "../controllers/home.controller";
 const router = Router();
 
 router.use(auth);
+
 /**
- * Request: ()
- * Response: (
-    val data : HomeData,
-    val success : Boolean
-	)
- * HomeData: (
-    val couponView : List<CouponItem>,
-    val restaurantList : List<RestaurantItem>
-	)
- * CouponItem: (
-    val couponId : String?,
-    val discountAmount: String?,
-    val description: String?,
-    val logo: Int?
-	)
- * RestaurantItem: (
-    val id : String?,
-    val name : String?,
-    val type : String?,
-    val rating : String?,
-    val image : Int?,
-    val deliveryFee : String
-	)
+ * Request: {}
+ * Response: {
+		success : true,
+    data : {
+			couponView: Coupon[];
+			restaurantList: Restaurant[];
+		}
+	}
+ * Coupon: {
+    couponId : String?,
+    discountAmount: String?,
+    description: String?,
+    logo: Int?
+	}
+ * Restaurant: {
+    id : String?,
+    name : String?,
+    type : String?,
+    rating : String?,
+    image : Int?,
+    deliveryFee : String
+	}
  */
 router.get('/home', getHomePageData);
 

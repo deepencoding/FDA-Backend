@@ -111,7 +111,8 @@ export async function getTopRestaurants(limit: number = 7): Promise<Restaurant[]
       name,
       type,
       rating,
-      image_url AS image
+      image_url AS image,
+			delivery_fee AS deliveryFee
     FROM restaurant_info
     ORDER BY rating DESC
     LIMIT ${limit}

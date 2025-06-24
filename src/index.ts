@@ -17,6 +17,7 @@ export type Restaurant = {
   type: string;
   rating: number;
   image: string;
+	deliveryFee: number;
 };
 
 export type Coupon = {
@@ -27,6 +28,10 @@ export type Coupon = {
 };
 
 app.use(express.json());
+
+app.get('/', function (_req, res) {
+	res.redirect('/home');
+});
 
 app.use(userRouter);
 app.use(homeRouter);
