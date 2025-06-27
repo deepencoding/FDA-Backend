@@ -1,59 +1,64 @@
 import { Router } from "express";
 import { auth } from "../middlewares/auth.middleware";
-import { getCart } from "../controllers/cart.controller";
+import { addCart, getCart, updateCart } from "../controllers/cart.controller";
 
 const router = Router();
 
 router.use(auth);
 
 /**
- * Request: ()
+ * Request: {}
  */
 router.get('/cart', getCart);
 
 /**
- * Request: (
-    val restaurantId : String,
-    val itemId : String,
-    val itemQuantity : String,
-	)
+ * Request: {
+    restaurantId: number;
+    items: [{ itemId: number; itemQuantity: number }];
+    noteForRestaurant?: string;
+    noteForDeliveryPartner?: string;
+    deliveryType?: "standard" | "scheduled";
+    scheduledDeliveryTime?: string;
+	}
  */
-// TODO: router.post('/cart', addCart);
+router.post('/cart', addCart);
 
 /**
- * Request: (
-    val restaurantId : String,
-    val itemId : String,
-    val itemQuantity : String
-	)
- */
-// TODO: router.put('/cart', updateCart);
+ * Request: {
+    restaurantId: number;
+    items: [{ itemId: number; itemQuantity: number }];
+    noteForRestaurant?: string;
+    noteForDeliveryPartner?: string;
+    deliveryType?: "standard" | "scheduled";
+    scheduledDeliveryTime?: string;
+	}
+*/
+router.put('/cart', updateCart);
 
 /**
- * Response: (
-    val data : CartData?,
-    val success : Boolean?
-	)
- * CartData: (
-    val restaurantData : RestaurantData?,
-    val cartItemCount : String?,
-    val noteForRestaurant : String?,
-    val noteForDeliveryPartner : String,
-    val deliveryType : String,
-    val scheduledDeliveryTime : String,
-    val subtotal : String?,
-    val itemData: List<ItemData>?
-	)
-
- * ItemData: (
-    val customizationQuestions: List<CustomizationQuestion>,
-    val itemDescription: String,
-    val itemId: String,
-    val itemImage: String,
-    val itemName: String,
-    val itemPrice: String,
-    val cartItemCount: String
-	)
+ * Response: {
+ * 	success: true,
+ * 	data: {
+			restaurant: {
+				name: string;
+				address: string
+			} | null;
+			cartItemCount: number;
+			noteForRestaurant: string | undefined;
+			noteForDeliveryPartner: string | undefined;
+			deliveryType: "standard" | "scheduled" | undefined;
+			scheduledDeliveryTime: string | undefined;
+			subtotal: number | undefined;
+			items: [
+				{
+					itemId: number,
+					itemName: string,
+					itemImage: string,
+					quantity: number
+				}
+			];
+		}
+ * }
  */
 
 export const cartRouter = router;
