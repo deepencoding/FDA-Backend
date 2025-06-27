@@ -1,9 +1,9 @@
-import { clearCartItems, createCart, getActiveCartId, getCartItems, getCartMeta, getCartRestaurant, updateCartNotes, upsertCartItems } from "../models/cart.model";
+import { clearCartItems, createCart, getActiveCartId, getCartItems, getCartMeta, getCartRestaurant, updateCartNotes, upsertCartItem } from "../models/cart.model";
 
-type cartItemPayload = { itemId: number; itemQuantity: number };
 type cartPayload = {
 	restaurantId: number;
-	items: cartItemPayload[];
+	itemId: number;
+	itemQuantity: number;
 	noteForRestaurant?: string;
 	noteForDeliveryPartner?: string;
 	deliveryType?: 'standard' | 'scheduled';
@@ -16,8 +16,6 @@ export async function fetchCartData(userId: number) {
     getCartMeta(userId),
     getCartItems(userId)
   ]);
-
-  // const isCartEmpty = !restaurant;
 
   return {
     restaurant: restaurant ?? null,
@@ -32,29 +30,25 @@ export async function fetchCartData(userId: number) {
 }
 
 export async function addCartData(userId: number, payload: cartPayload) {
-	const { restaurantId, items, ...meta } = payload;
+	const { restaurantId, itemId, itemQuantity, ...meta } = payload;
 
 	let cartId = await getActiveCartId(userId);
 	if (!cartId) {
 		cartId = await createCart(userId, restaurantId, meta);
-	} else {
-		await clearCartItems(cartId);
-		await updateCartNotes(cartId, restaurantId, meta);
 	}
 
-	for (const { itemId, itemQuantity } of items) {
-		await upsertCartItems(cartId, itemId, itemQuantity);
+	let oldRestaurantId = await getCartRestaurant(userId);
+	if (restaurantId !== oldRestaurantId) {
+		await clearCartItems(cartId);
 	}
+
+	await updateCartNotes(cartId, restaurantId, meta);
+	await upsertCartItem(cartId, itemId, itemQuantity);
 }
 
-export async function updateCartData(userId: number, payload: cartPayload) {
-	const { restaurantId, items, ...meta } = payload;
+export async function updateCartData(userId: number, payload: Omit<cartPayload, 'restaurantId'>) {
 	const cartId = await getActiveCartId(userId);
 	if (!cartId) throw new Error('No active cart');
 
-	await updateCartNotes(cartId, restaurantId, meta);
-
-	for (const { itemId, itemQuantity } of items) {
-		await upsertCartItems(cartId, itemId, itemQuantity);
-	}
+	await upsertCartItem(cartId, payload.itemId, payload.itemQuantity);
 }

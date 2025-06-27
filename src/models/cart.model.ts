@@ -1,10 +1,5 @@
 import { sql } from "bun";
 
-type cartRestaurantInfo = {
-  name: string;
-  address: string
-};
-
 type cartItemsInfo = {
 	itemId: number,
 	itemName: string,
@@ -58,7 +53,7 @@ export async function clearCartItems(cartId: number) {
 	`;
 }
 
-export async function upsertCartItems(cartId: number, itemId: number, quantity: number) {
+export async function upsertCartItem(cartId: number, itemId: number, quantity: number) {
 	if (quantity <= 0) {
 		await sql`
 			DELETE FROM cart_items WHERE cart_id = ${cartId} AND item_id = ${itemId}
@@ -95,16 +90,14 @@ export async function updateCartNotes(
   `;
 }
 
-export async function getCartRestaurant(userId: number): Promise<cartRestaurantInfo | undefined> {
-  const [restaurant]: cartRestaurantInfo[] = await sql`
+export async function getCartRestaurant(userId: number): Promise<number> {
+  const restaurant: { restaurantId: number }[] = await sql`
     SELECT
-      r.name AS name,
-      r.address AS address
-    FROM restaurant_info r
-    JOIN carts c ON c.restaurant_id = r.restaurant_id
-    WHERE c.user_id = ${userId} AND c.restaurant_id IS NOT NULL
+			c.restaurant_id AS restaurantId
+    FROM carts c
+    WHERE c.user_id = ${userId}
   `;
-  return restaurant;
+  return restaurant[0]?.restaurantId ?? 0;
 }
 
 export async function getCartMeta(userId: number): Promise<cartMeta | undefined> {

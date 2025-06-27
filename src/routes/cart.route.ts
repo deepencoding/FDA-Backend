@@ -14,7 +14,8 @@ router.get('/cart', getCart);
 /**
  * Request: {
     restaurantId: number;
-    items: [{ itemId: number; itemQuantity: number }];
+    itemId: number;
+		itemQuantity: number;
     noteForRestaurant?: string;
     noteForDeliveryPartner?: string;
     deliveryType?: "standard" | "scheduled";
@@ -25,8 +26,8 @@ router.post('/cart', addCart);
 
 /**
  * Request: {
-    restaurantId: number;
-    items: [{ itemId: number; itemQuantity: number }];
+    itemId: number;
+		itemQuantity: number;
     noteForRestaurant?: string;
     noteForDeliveryPartner?: string;
     deliveryType?: "standard" | "scheduled";
