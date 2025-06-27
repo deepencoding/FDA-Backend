@@ -4,15 +4,15 @@ import * as userService from '../services/user.service';
 
 export const loginOne = async (req: Request, res: Response): Promise<void> => {
   try {
-    const foundUser = await userService.login(req.body);
+    const userToken = await userService.login(req.body);
     res.status(200).json({
       success: true,
       data: {
-        foundUser,
+        token: userToken,
       }
     });
   } catch(error) {
-    res.status(500).json({
+    res.status(403).json({
       success: false,
       message: getErrorMessage(error)
     });
@@ -21,11 +21,11 @@ export const loginOne = async (req: Request, res: Response): Promise<void> => {
 
 export const registerOne = async (req: Request, res: Response): Promise<void> => {
   try {
-    await userService.register(req.body);
+    const userToken = await userService.register(req.body);
     res.status(201).json({
       success: true,
       data: {
-        message: 'User registered Succesfully'
+				token: userToken
       }
     });
   } catch(error) {
