@@ -1,4 +1,5 @@
 import { sql } from "bun";
+import type { RestaurantInfo } from "../services/cart.service";
 
 type cartItemsInfo = {
 	itemId: number,
@@ -22,7 +23,7 @@ export async function getActiveCartId(userId: number): Promise<number | null> {
 	return cartId[0]?.id ?? null;
 }
 
-export async function createCart(userId: number, restaurantId: number,
+export async function createCart(userId: number, restaurantId: number | null,
 meta: {
 	noteForRestaurant?: string;
 	noteForDeliveryPartner?: string;
@@ -35,13 +36,13 @@ meta: {
 			note_for_restaurant,
 			note_for_delivery_partner,
 			delivery_type,
-			scheduled_delivery_type
+			scheduled_delivery_time
 		) VALUES (
 			${userId}, ${restaurantId},
 			${meta.noteForRestaurant ?? null},
 			${meta.noteForDeliveryPartner ?? null},
 			${meta.deliveryType ?? 'standard'},
-			${meta.scheduledDeliveryTime ?? null},
+			${meta.scheduledDeliveryTime ?? null}
 		) RETURNING id
 	`;
 	return cartId[0]?.id ?? 0;
@@ -90,17 +91,17 @@ export async function updateCartNotes(
   `;
 }
 
-export async function getCartRestaurant(userId: number): Promise<number> {
+export async function getCartRestaurant(cartId: number): Promise<number> {
   const restaurant: { restaurantId: number }[] = await sql`
     SELECT
 			c.restaurant_id AS restaurantId
     FROM carts c
-    WHERE c.user_id = ${userId}
+    WHERE c.id = ${cartId}
   `;
   return restaurant[0]?.restaurantId ?? 0;
 }
 
-export async function getCartMeta(userId: number): Promise<cartMeta | undefined> {
+export async function getCartMeta(cartId: number): Promise<cartMeta | undefined> {
   const [cart]: cartMeta[] = await sql`
     SELECT
       note_for_restaurant,
@@ -109,20 +110,32 @@ export async function getCartMeta(userId: number): Promise<cartMeta | undefined>
       scheduled_delivery_time,
       subtotal
     FROM carts
-    WHERE user_id = ${userId}
+    WHERE id = ${cartId}
   `;
   return cart;
 }
 
-export async function getCartItems(userId: number): Promise<cartItemsInfo[]> {
+export async function getCartItems(cartId: number): Promise<cartItemsInfo[]> {
   return await sql`
     SELECT
       ci.item_id AS itemId,
       mi.name AS itemName,
       mi.image_url AS itemImage,
-      ci.quantity
+      ci.quantity AS itemQuantity
     FROM cart_items ci
     JOIN menu_items mi ON ci.item_id = mi.id
-    WHERE ci.user_id = ${userId}
+    WHERE ci.cart_id = ${cartId}
   ` as cartItemsInfo[];
+}
+
+export async function getRestaurantInfo(restaurantId: number): Promise<RestaurantInfo> {
+	return await sql`
+		SELECT
+			restaurant_id AS id,
+			image_url AS image,
+			name,
+			address
+		FROM restaurant_info
+		WHERE restaurant_id = ${restaurantId}
+	` as RestaurantInfo;
 }

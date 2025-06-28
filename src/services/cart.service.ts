@@ -1,4 +1,4 @@
-import { clearCartItems, createCart, getActiveCartId, getCartItems, getCartMeta, getCartRestaurant, updateCartNotes, upsertCartItem } from "../models/cart.model";
+import { clearCartItems, createCart, getActiveCartId, getCartItems, getCartMeta, getCartRestaurant, getRestaurantInfo, updateCartNotes, upsertCartItem } from "../models/cart.model";
 
 type cartPayload = {
 	restaurantId: number;
@@ -10,12 +10,27 @@ type cartPayload = {
 	scheduledDeliveryTime?: string;
 };
 
+export type RestaurantInfo = {
+	id: number;
+	image: string;
+	name: string;
+	address: string;
+};
+
 export async function fetchCartData(userId: number) {
-  const [restaurant, cart, items] = await Promise.all([
-    getCartRestaurant(userId),
-    getCartMeta(userId),
-    getCartItems(userId)
+	let cartId = await getActiveCartId(userId);
+	if (!cartId) {
+		cartId = await createCart(userId, null, {});
+	}
+  const [restaurantId, cart, items] = await Promise.all([
+    getCartRestaurant(cartId),
+    getCartMeta(cartId),
+    getCartItems(cartId)
   ]);
+	console.log(restaurantId);
+
+	let restaurant: RestaurantInfo | null = null;
+	if (restaurantId) restaurant = await getRestaurantInfo(restaurantId);
 
   return {
     restaurant: restaurant ?? null,

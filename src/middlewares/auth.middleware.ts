@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { config } from "../config/env";
+import { getErrorMessage } from "../utils/errors";
 
 interface TokenPayload extends JwtPayload {
   id: number;
@@ -24,12 +25,15 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       throw new Error('Invalid token format');
     };
 
+		console.log(decoded);
+		if (!(decoded as TokenPayload).id) throw new Error('Missing user ID');
+
     (req as CustomRequest).user = decoded as TokenPayload;
     next();
   } catch(error) {
     res.status(401).json({
       success: false,
-      message: 'Please Authenticate'
+      message: getErrorMessage(error)
     });
   };
 };
