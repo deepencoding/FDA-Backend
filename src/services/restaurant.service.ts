@@ -69,4 +69,22 @@ export const deleteMenuItem = async (
     throw { status: 404, message: 'Menu item not found' };
   }
   return deleted;
+};
+
+export const getAllRestaurants = async () => {
+  return await restaurantModel.getTopRestaurants();
+};
+
+export const getMenuItemByRestaurant = async (restaurantId: number, itemId: number) => {
+  const menuItem = await restaurantModel.getMenuItemById(itemId);
+  
+  if (!menuItem) {
+    throw { status: 404, message: 'Menu item not found' };
+  }
+  
+  if (menuItem.restaurant_id !== restaurantId) {
+    throw { status: 404, message: 'Menu item not found in this restaurant' };
+  }
+  
+  return menuItem;
 }; 

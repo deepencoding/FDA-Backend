@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { auth } from '../middlewares/auth.middleware';
 import {
   getRestaurantDetails,
+  getAllRestaurants,
+  getMenuItemByRestaurant,
   updateRestaurant,
   addMenuItem,
   updateMenuItem,
@@ -11,7 +13,9 @@ import {
 const router = Router();
 
 // Public routes
+router.get('/restaurants', getAllRestaurants);
 router.get('/restaurants/:id', getRestaurantDetails);
+router.get('/restaurants/:restaurantId/menu/:itemId', getMenuItemByRestaurant);
 
 // Protected routes - require authentication
 router.use(auth);

@@ -16,9 +16,29 @@ export const getRestaurantDetails = async (req: Request, res: Response): Promise
     const restaurantId = parseInt(req.params.id);
     const data = await restaurantService.getRestaurantDetails(restaurantId);
 
+    // Convert to match API contract format
+    const responseData = {
+      restaurantId: data.restaurant.restaurant_id.toString(),
+      restaurantImage: data.restaurant.image_url,
+      floatingView: {
+        name: data.restaurant.name,
+        address: data.restaurant.address || "",
+        logo: data.restaurant.image_url,
+        deliveryTime: "30-45 min", // Default value
+        rating: data.restaurant.rating?.toString() || "0"
+      },
+      featuredItemsList: data.menu_items.map((item: any) => ({
+        itemID: item.id.toString(),
+        itemName: item.name,
+        itemDesc: item.description,
+        itemPrice: item.price.toString(),
+        itemImage: item.image_url || ""
+      }))
+    };
+
     res.status(200).json({
       success: true,
-      data
+      data: responseData
     });
   } catch (error) {
     res.status(500).json({
@@ -192,6 +212,79 @@ export const deleteMenuItem = async (req: Request, res: Response): Promise<void>
       data: {
         message: 'Menu item deleted successfully'
       }
+    });
+  } catch (error: any) {
+    res.status(error.status || 500).json({
+      success: false,
+      message: getErrorMessage(error)
+    });
+  }
+};
+
+// Get all restaurants
+export const getAllRestaurants = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const restaurants = await restaurantService.getAllRestaurants();
+    
+    // Convert to match API contract format
+    const restaurantList = restaurants.map((restaurant: any) => ({
+      id: restaurant.id.toString(),
+      name: restaurant.name,
+      type: restaurant.type,
+      rating: restaurant.rating.toString(),
+      image: restaurant.image,
+      deliveryFee: restaurant.deliveryFee.toString()
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: restaurantList
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: getErrorMessage(error)
+    });
+  }
+};
+
+// Get menu item by restaurant and item ID
+export const getMenuItemByRestaurant = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.params.restaurantId) {
+      res.status(400).json({
+        success: false,
+        message: 'Restaurant id not found.'
+      });
+      return;
+    }
+    const restaurantId = parseInt(req.params.restaurantId);
+
+    if (!req.params.itemId) {
+      res.status(400).json({
+        success: false,
+        message: 'Menu item id not found.'
+      });
+      return;
+    }
+    const itemId = parseInt(req.params.itemId);
+
+    const data = await restaurantService.getMenuItemByRestaurant(restaurantId, itemId);
+
+    // Convert to match API contract format
+    const responseData = {
+      customizationQuestions: [], // Empty for now, can be extended later
+      itemDescription: data.description,
+      itemId: data.id.toString(),
+      itemImage: data.image_url || "",
+      itemName: data.name,
+      itemPrice: data.price.toString(),
+      cartItemCount: "0" // Default value
+    };
+
+    res.status(200).json({
+      success: true,
+      data: responseData
     });
   } catch (error: any) {
     res.status(error.status || 500).json({

@@ -10,6 +10,8 @@ export type MenuItem = {
   image_url?: string;
   category: string;
   is_available: boolean;
+  is_featured?: boolean;
+  customization_options?: any;
   created_at: string;
 };
 
