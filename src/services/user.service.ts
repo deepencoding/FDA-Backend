@@ -7,7 +7,7 @@ export type NewUser = {
   name: string;
   phone_no: string;
   password: string;
-  role: 'user' | 'restaurant';
+  role?: 'user' | 'restaurant';
 };
 
 const saltRounds = 10;
@@ -39,7 +39,7 @@ export async function login({
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) throw new Error('Wrong Password');
 
-    const token = jwt.sign({ _id: user.id?.toString(), role: user.role }, config.JWT_SECRET, {
+    const token = jwt.sign({ id: user.id?.toString(), role: user.role }, config.JWT_SECRET, {
       expiresIn: '7 days',
     });
 

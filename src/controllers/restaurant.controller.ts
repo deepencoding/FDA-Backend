@@ -19,7 +19,7 @@ export const getRestaurantDetails = async (req: Request, res: Response): Promise
     // Convert to match API contract format
     const responseData = {
       restaurantId: data.restaurant.restaurant_id.toString(),
-      restaurantImage: data.restaurant.image_url,
+      restaurantImage: data.restaurant.image_url.toString(),
       floatingView: {
         name: data.restaurant.name,
         address: data.restaurant.address || "",

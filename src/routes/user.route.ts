@@ -22,15 +22,11 @@ router.post('/login', loginOne);
 router.post('/register', registerOne);
 
 /**
- * Response(200): {
+ * Response: {
 		success: true,
 		data: {
 			token: string
 		}
-	}
- * Respone(403): {
-		success: false,
-		message: string
 	}
 */
 
