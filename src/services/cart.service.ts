@@ -62,7 +62,7 @@ export async function addCartData(userId: number, payload: cartPayload) {
 		cartId = await createCart(userId, Number(restaurantId), meta);
 	}
 
-	console.log(cartId);
+	//console.log(cartId);
 	let oldRestaurantId = await getCartRestaurant(cartId);
 	//console.log(restaurantId, oldRestaurantId);
 	if (+restaurantId !== oldRestaurantId) {
