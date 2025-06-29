@@ -2,7 +2,7 @@ import { sql } from "bun";
 import type { RestaurantInfo } from "../services/cart.service";
 
 type cartItemsInfo = {
-	itemId: number,
+	itemId: string,
 	itemName: string,
 	itemImage: string,
 	quantity: number
@@ -16,9 +16,9 @@ type cartMeta = {
 	subtotal: number
 };
 
-export async function getActiveCartId(userId: number): Promise<number | null> {
-	const cartId: { id: number }[] = await sql`
-		SELECT id FROM carts WHERE user_id = ${userId} LIMIT 1
+export async function getActiveCartId(userId: number): Promise<string | null> {
+	const cartId: { id: string }[] = await sql`
+		SELECT id::text FROM carts WHERE user_id = ${userId} LIMIT 1
 	`;
 	return cartId[0]?.id ?? null;
 }
@@ -94,7 +94,7 @@ export async function updateCartNotes(
 export async function getCartRestaurant(cartId: number): Promise<number> {
   const restaurant: { restaurantId: number }[] = await sql`
     SELECT
-			c.restaurant_id AS restaurantId
+			c.restaurant_id AS "restaurantId"
     FROM carts c
     WHERE c.id = ${cartId}
   `;
@@ -118,10 +118,12 @@ export async function getCartMeta(cartId: number): Promise<cartMeta | undefined>
 export async function getCartItems(cartId: number): Promise<cartItemsInfo[]> {
   return await sql`
     SELECT
-      ci.item_id AS itemId,
-      mi.name AS itemName,
-      mi.image_url AS itemImage,
-      ci.quantity AS itemQuantity
+      ci.item_id AS "itemId",
+      mi.name AS "itemName",
+      mi.image_url AS "itemImage",
+      ci.quantity AS "cartItemCount",
+			mi.description AS "itemDescription",
+			mi.price AS "itemPrice"
     FROM cart_items ci
     JOIN menu_items mi ON ci.item_id = mi.id
     WHERE ci.cart_id = ${cartId}
@@ -131,9 +133,9 @@ export async function getCartItems(cartId: number): Promise<cartItemsInfo[]> {
 export async function getRestaurantInfo(restaurantId: number): Promise<RestaurantInfo> {
 	return await sql`
 		SELECT
-			restaurant_id AS id,
-			image_url AS image,
-			name,
+			restaurant_id AS "restaurantId",
+			image_url AS "restaurantImage",
+			name AS "restaurantName",
 			address
 		FROM restaurant_info
 		WHERE restaurant_id = ${restaurantId}

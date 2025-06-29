@@ -7,7 +7,7 @@ export type NewUser = {
   name: string;
   phone_no: string;
   password: string;
-  role: 'user' | 'restaurant';
+  role?: 'user' | 'restaurant';
 };
 
 const saltRounds = 10;

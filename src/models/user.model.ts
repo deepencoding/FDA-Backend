@@ -10,7 +10,7 @@ export type UserRecord = {
 };
 
 export async function insertUser(userData: {
-  name: string; phone_no: string; password_hash:string; role: 'user' | 'restaurant';
+  name: string; phone_no: string; password_hash:string; role?: 'user' | 'restaurant';
 }): Promise<void> {
   const result: UserRecord[] = await sql`
 		INSERT INTO users ${sql(userData)} RETURNING id

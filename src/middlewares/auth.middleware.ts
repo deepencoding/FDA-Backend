@@ -25,7 +25,6 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       throw new Error('Invalid token format');
     };
 
-		console.log(decoded);
 		if (!(decoded as TokenPayload).id) throw new Error('Missing user ID');
 
     (req as CustomRequest).user = decoded as TokenPayload;

@@ -11,10 +11,10 @@ type cartPayload = {
 };
 
 export type RestaurantInfo = {
-	id: number;
-	image: string;
-	name: string;
-	address: string;
+	restaurantId: number;
+	restaurantImage: string;
+	restaurantName: string;
+	address?: string;
 };
 
 export async function fetchCartData(userId: number) {
@@ -27,13 +27,12 @@ export async function fetchCartData(userId: number) {
     getCartMeta(cartId),
     getCartItems(cartId)
   ]);
-	console.log(restaurantId);
 
 	let restaurant: RestaurantInfo | null = null;
 	if (restaurantId) restaurant = await getRestaurantInfo(restaurantId);
 
   return {
-    restaurant: restaurant ?? null,
+    restaurantData: restaurant ?? null,
     cartItemCount: items.length,
     noteForRestaurant: cart?.noteForRestaurant,
     noteForDeliveryPartner: cart?.noteForDeliveryPartner,
@@ -52,7 +51,9 @@ export async function addCartData(userId: number, payload: cartPayload) {
 		cartId = await createCart(userId, restaurantId, meta);
 	}
 
-	let oldRestaurantId = await getCartRestaurant(userId);
+	console.log(cartId);
+	let oldRestaurantId = await getCartRestaurant(cartId);
+	console.log(restaurantId, oldRestaurantId);
 	if (restaurantId !== oldRestaurantId) {
 		await clearCartItems(cartId);
 	}
