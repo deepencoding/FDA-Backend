@@ -1,7 +1,7 @@
 import { sql } from "bun";
 import type { RestaurantInfo } from "../services/cart.service";
 
-type cartItemsInfo = {
+export type cartItemsInfo = {
 	itemId: string,
 	itemName: string,
 	itemImage: string,
@@ -16,9 +16,9 @@ type cartMeta = {
 	subtotal: number
 };
 
-export async function getActiveCartId(userId: number): Promise<string | null> {
-	const cartId: { id: string }[] = await sql`
-		SELECT id::text FROM carts WHERE user_id = ${userId} LIMIT 1
+export async function getActiveCartId(userId: number): Promise<number | null> {
+	const cartId: { id: number }[] = await sql`
+		SELECT id FROM carts WHERE user_id = ${userId} LIMIT 1
 	`;
 	return cartId[0]?.id ?? null;
 }

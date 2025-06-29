@@ -19,14 +19,14 @@ router.use(auth);
     couponId : String?,
     discountAmount: String?,
     description: String?,
-    logo: Int?
+    logo: String?
 	}
  * Restaurant: {
     id : String?,
     name : String?,
     type : String?,
     rating : String?,
-    image : Int?,
+    image : String?,
     deliveryFee : String
 	}
  */

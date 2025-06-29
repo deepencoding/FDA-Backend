@@ -109,12 +109,12 @@ export async function updateRestaurantInfo(
 export async function getTopRestaurants(limit: number = 7): Promise<Restaurant[]> {
   return await sql`
     SELECT
-      restaurant_id AS "id",
+      restaurant_id::text AS "id",
       name,
       type,
       rating,
       image_url AS "image",
-			delivery_fee AS "deliveryFee"
+			delivery_fee::text AS "deliveryFee"
     FROM restaurant_info
     ORDER BY rating DESC
     LIMIT ${limit}

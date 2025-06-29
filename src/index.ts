@@ -11,18 +11,18 @@ const app = express();
 const port = config.PORT || 3000;
 
 export type Restaurant = {
-  id: number;
+  id: string;
   name: string;
   type: string;
-  rating: number;
+  rating: string;
   image: string;
-  deliveryFee: number;
+  deliveryFee: string;
   deliveryTime?: string;
   logo?: string;
 };
 
 export type Coupon = {
-  couponId: number;
+  couponId: string;
   discountAmount: string;
   description: string;
   logo: string;

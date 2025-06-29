@@ -4,8 +4,8 @@ import type { Coupon } from "..";
 export async function getActiveCoupons(): Promise<Coupon[]> {
   return await sql`
     SELECT
-      id AS "couponId",
-      discount_amount AS "discountAmount",
+      id::text AS "couponId",
+      discount_amount::text AS "discountAmount",
       description,
       logo_url AS "logo"
     FROM coupons

@@ -13,8 +13,8 @@ router.get('/cart', getCart);
 
 /**
  * Request: {
-    restaurantId: number;
-    itemId: number;
+    restaurantId: string;
+    itemId: string;
 		itemQuantity: number;
     noteForRestaurant?: string;
     noteForDeliveryPartner?: string;
@@ -26,7 +26,7 @@ router.post('/cart', addCart);
 
 /**
  * Request: {
-    itemId: number;
+    itemId: string;
 		itemQuantity: number;
     noteForRestaurant?: string;
     noteForDeliveryPartner?: string;
