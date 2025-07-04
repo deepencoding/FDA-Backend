@@ -131,7 +131,7 @@ export async function getCartItems(cartId: number): Promise<cartItemsInfo[]> {
 }
 
 export async function getRestaurantInfo(restaurantId: number): Promise<RestaurantInfo> {
-	return await sql`
+	const [restaurantData]: RestaurantInfo[] = await sql`
 		SELECT
 			restaurant_id AS "restaurantId",
 			image_url AS "restaurantImage",
@@ -139,5 +139,6 @@ export async function getRestaurantInfo(restaurantId: number): Promise<Restauran
 			address
 		FROM restaurant_info
 		WHERE restaurant_id = ${restaurantId}
-	` as RestaurantInfo;
+	`;
+	return restaurantData;
 }
