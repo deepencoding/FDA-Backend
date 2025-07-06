@@ -57,17 +57,7 @@ VALUES
 		'https://blog.swiggy.com/wp-content/uploads/2024/03/Paav-Bhaji-1024x538.jpg'
 	]),
 	('coupon_logo_urls', ARRAY[
-		'https://plus.unsplash.com/premium_photo-1670509045675-af9f249b1bbe',
-		'https://plus.unsplash.com/premium_photo-1670152411569-7cbc00946857',
-		'https://images.unsplash.com/photo-1700843699012-0dadd2089fe4',
-		'https://plus.unsplash.com/premium_photo-1728613749980-cd3e758183df',
-		'https://plus.unsplash.com/premium_photo-1683887064106-531532ecdf20',
-		'https://plus.unsplash.com/premium_photo-1683887064374-dc6dd77ece50?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzN8fGNvdXBvbnN8ZW58MHx8MHx8fDA%3D',
-		'https://plus.unsplash.com/premium_photo-1729036509325-61f71a2bf13f',
-		'https://images.pexels.com/photos/6675830/pexels-photo-6675830.jpeg',
-		'https://images.pexels.com/photos/7957753/pexels-photo-7957753.jpeg',
-		'https://images.pexels.com/photos/7957747/pexels-photo-7957747.jpeg',
-		'https://images.pexels.com/photos/5650045/pexels-photo-5650045.jpeg'
+		'https://i.ibb.co/HpD0cx4N/Icon.png'
 	]);
 
 /* --------------------------------------------------------------------
