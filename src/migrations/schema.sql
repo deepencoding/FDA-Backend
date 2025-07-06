@@ -54,36 +54,36 @@ CREATE TABLE IF NOT EXISTS menu_items (
 );
 
 CREATE TABLE IF NOT EXISTS carts (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    restaurant_id INTEGER REFERENCES users(id),
-    note_for_restaurant TEXT,
-    note_for_delivery_partner TEXT,
-    delivery_type VARCHAR(20) DEFAULT 'standard',
-    scheduled_delivery_time TIMESTAMP WITH TIME ZONE,
-    subtotal DECIMAL(10,2) DEFAULT 0.0,
-    -- status VARCHAR(20) DEFAULT 'active',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+	id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	restaurant_id INTEGER REFERENCES users(id),
+	note_for_restaurant TEXT,
+	note_for_delivery_partner TEXT,
+	delivery_type VARCHAR(20) DEFAULT 'standard',
+	scheduled_delivery_time TIMESTAMP WITH TIME ZONE,
+	subtotal DECIMAL(10,2) DEFAULT 0.0,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS order_items (
-    id SERIAL PRIMARY KEY,
-    order_id INTEGER NOT NULL,
-    menu_item_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
-    unit_price NUMERIC(10,2) NOT NULL,
-    total_price NUMERIC(10,2) NOT NULL,
-    special_instructions TEXT,
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE RESTRICT
+	id SERIAL PRIMARY KEY,
+	order_id INTEGER NOT NULL,
+	menu_item_id INTEGER NOT NULL,
+	quantity INTEGER NOT NULL CHECK (quantity > 0),
+	unit_price NUMERIC(10,2) NOT NULL,
+	total_price NUMERIC(10,2) NOT NULL,
+	special_instructions TEXT,
+	FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+	FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS cart_items (
-    id SERIAL PRIMARY KEY,
-    cart_id INTEGER NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
-    item_id INTEGER NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+	id SERIAL PRIMARY KEY,
+	cart_id INTEGER NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
+	item_id INTEGER NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,
+	quantity INTEGER NOT NULL CHECK (quantity > 0),
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT cart_items_cart_item_uc UNIQUE (cart_id, item_id)
 );
 
 CREATE TABLE IF NOT EXISTS coupons(
@@ -104,6 +104,5 @@ CREATE TABLE IF NOT EXISTS reviews (
 	updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 	FOREIGN KEY (restaurant_id) REFERENCES restaurant_info(restaurant_id) ON DELETE CASCADE,
-	-- Ensure one review per user per restaurant
 	UNIQUE (user_id, restaurant_id)
 );

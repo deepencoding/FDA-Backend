@@ -205,7 +205,7 @@ JOIN menu_items mi ON mi.restaurant_id = crt.restaurant_id
 JOIN LATERAL (
   SELECT generate_series(1, (3 + floor(random()*2))::INT) AS filler
 ) g ON TRUE
-ORDER BY crt.id;
+ON CONFLICT (cart_id, item_id) DO NOTHING;
 
 /* --------------------------------------------------------------------
 	8.  ORDERS  (create 40 closed orders from existing carts)
