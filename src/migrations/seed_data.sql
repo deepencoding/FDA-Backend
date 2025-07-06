@@ -134,13 +134,15 @@ SELECT
   u.name,
   (ARRAY['Indian', 'Italian', 'Japanese', 'Mexican', 'Chinese'])[ceil(random()*5)] AS type,
   round((random()*1.5 + 3)::numeric, 1) AS rating,
-	(SELECT urls[ceil(random()*array_length(urls, 1))::int]
-		FROM temp_image_urls WHERE array_name = 'restaurant_image_urls') AS image_url,
+  (SELECT urls[(u.id - 1) % array_length(urls, 1) + 1]
+		FROM temp_image_urls
+		WHERE array_name = 'restaurant_image_urls') AS image_url,
   (5 + floor(random()*5)) * 10 AS delivery_fee,
   '42 Food Street, City #'||u.id AS address,
   '30-45 min' AS delivery_time,
-	(SELECT urls[ceil(random()*array_length(urls, 1))::int]
-		FROM temp_image_urls WHERE array_name = 'logo_urls') AS logo_url
+  (SELECT urls[(u.id - 1) % array_length(urls, 1) + 1]
+		FROM temp_image_urls
+		WHERE array_name = 'logo_urls') AS logo_url
 FROM users u
 WHERE u.role = 'restaurant';
 
@@ -158,13 +160,19 @@ SELECT
   'Dish '||gs,
   'Tasty lorem-ipsum food #'||gs,
   round((random()*15 + 5)::numeric, 2),
-	(SELECT urls[ceil(random()*array_length(urls, 1))::int]
-		FROM temp_image_urls WHERE array_name = 'menu_item_image_urls') AS image_url,
+	(
+    SELECT urls[((r.rn - 1) * 20 + gs - 1) % array_length(urls, 1) + 1]
+    FROM temp_image_urls
+    WHERE array_name = 'menu_item_image_urls'
+  ) AS image_url,
   (ARRAY['Main', 'Starter', 'Dessert'])[ceil(random()*3)],
   true,
   (random() < 0.25),
 	'{}'::jsonb
-FROM restaurant_info r
+FROM (
+  SELECT restaurant_id, row_number() OVER (ORDER BY restaurant_id) AS rn
+  FROM restaurant_info
+) r
 CROSS JOIN generate_series(1, 20) AS gs;
 
 /* --------------------------------------------------------------------
