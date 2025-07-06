@@ -101,7 +101,7 @@ export async function getCartRestaurant(cartId: number): Promise<number> {
   return restaurant[0]?.restaurantId ?? 0;
 }
 
-export async function getCartMeta(cartId: number): Promise<cartMeta | undefined> {
+export async function getCartMeta(cartId: number): Promise<cartMeta | null> {
   const [cart]: cartMeta[] = await sql`
     SELECT
       note_for_restaurant,
@@ -112,7 +112,7 @@ export async function getCartMeta(cartId: number): Promise<cartMeta | undefined>
     FROM carts
     WHERE id = ${cartId}
   `;
-  return cart;
+  return cart ?? null;
 }
 
 export async function getCartItems(cartId: number): Promise<cartItemsInfo[]> {
@@ -130,7 +130,7 @@ export async function getCartItems(cartId: number): Promise<cartItemsInfo[]> {
   ` as cartItemsInfo[];
 }
 
-export async function getRestaurantInfo(restaurantId: number): Promise<RestaurantInfo> {
+export async function getRestaurantInfo(restaurantId: number): Promise<RestaurantInfo | null> {
 	const [restaurantData]: RestaurantInfo[] = await sql`
 		SELECT
 			restaurant_id AS "restaurantId",
@@ -140,5 +140,5 @@ export async function getRestaurantInfo(restaurantId: number): Promise<Restauran
 		FROM restaurant_info
 		WHERE restaurant_id = ${restaurantId}
 	`;
-	return restaurantData;
+	return restaurantData ?? null;
 }

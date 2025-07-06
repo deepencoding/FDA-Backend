@@ -20,11 +20,11 @@ export type RestaurantInfo = {
 type cartDataResponse = {
 	restaurantData: RestaurantInfo | null;
 	cartItemCount: string;
-	noteForRestaurant: string | undefined;
-	noteForDeliveryPartner: string | undefined;
-	deliveryType: "standard" | "scheduled" | undefined;
-	scheduledDeliveryTime: string | undefined;
-	subtotal: string | undefined;
+	noteForRestaurant: string;
+	noteForDeliveryPartner: string;
+	deliveryType: "standard" | "scheduled";
+	scheduledDeliveryTime: string;
+	subtotal: string;
 	items: cartItemsInfo[];
 };
 
@@ -43,12 +43,12 @@ export async function fetchCartData(userId: number): Promise<cartDataResponse> {
 	if (restaurantId) restaurant = await getRestaurantInfo(restaurantId);
 
   return {
-    restaurantData: restaurant ?? null,
+    restaurantData: restaurant,
     cartItemCount: String(items.length),
-    noteForRestaurant: cart?.noteForRestaurant,
-    noteForDeliveryPartner: cart?.noteForDeliveryPartner,
-    deliveryType: cart?.deliveryType,
-    scheduledDeliveryTime: cart?.scheduledDeliveryTime,
+    noteForRestaurant: cart?.noteForRestaurant ?? "",
+    noteForDeliveryPartner: cart?.noteForDeliveryPartner ?? "",
+    deliveryType: cart?.deliveryType ?? "standard",
+    scheduledDeliveryTime: cart?.scheduledDeliveryTime ?? "",
     subtotal: String(cart?.subtotal),
     items
   };

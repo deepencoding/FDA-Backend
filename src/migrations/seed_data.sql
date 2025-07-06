@@ -173,15 +173,16 @@ CROSS JOIN generate_series(1, 20) AS gs;
 INSERT INTO carts (
   user_id, restaurant_id,
   note_for_restaurant, note_for_delivery_partner,
-  delivery_type, subtotal
+  delivery_type, subtotal, scheduled_delivery_time
 )
 SELECT
   c.id,
   r.restaurant_id,
-  NULL,
-  NULL,
-  'standard',
-  0
+  'Please prepare with care.' AS note_for_restaurant,
+  'Deliver to front door.' AS note_for_delivery_partner,
+  'standard' AS delivery_type,
+  0 AS subtotal,
+  CURRENT_TIMESTAMP + INTERVAL '30 minutes' AS scheduled_delivery_time
 FROM (
   SELECT id FROM users WHERE role = 'user' ORDER BY random() LIMIT 25
 ) AS c
