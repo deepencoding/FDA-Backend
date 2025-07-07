@@ -25,7 +25,8 @@ export const getRestaurantDetails = async (req: Request, res: Response): Promise
         address: data.restaurant.address || "",
         logo: data.restaurant.image_url,
         deliveryTime: "30-45 min", // Default value
-        rating: data.restaurant.rating?.toString() || "0"
+        rating: data.restaurant.rating?.toString() || "0",
+        deliveryFee: data.restaurant.delivery_fee?.toString() || "0"
       },
       featuredItemsList: data.menu_items.map((item: any) => ({
         itemID: item.id.toString(),

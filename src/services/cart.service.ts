@@ -1,4 +1,5 @@
-import { clearCartItems, createCart, getActiveCartId, getCartItems, getCartMeta, getCartRestaurant, getRestaurantInfo, updateCartNotes, upsertCartItem, type cartItemsInfo } from "../models/cart.model";
+import { sql } from "bun";
+import { clearCartItems, createCart, getActiveCartId, getCartItems, getCartMeta, getCartRestaurant, getRestaurantInfo, updateCartNotes, upsertCartItem, type cartItemsInfo, calculateAndUpdateCartSubtotal } from "../models/cart.model";
 
 type cartPayload = {
 	restaurantId: string;
@@ -62,15 +63,18 @@ export async function addCartData(userId: number, payload: cartPayload) {
 		cartId = await createCart(userId, Number(restaurantId), meta);
 	}
 
-	//console.log(cartId);
 	let oldRestaurantId = await getCartRestaurant(cartId);
-	//console.log(restaurantId, oldRestaurantId);
 	if (+restaurantId !== oldRestaurantId) {
 		await clearCartItems(cartId);
+		// Reset subtotal when changing restaurants
+		await sql`UPDATE carts SET subtotal = 0 WHERE id = ${cartId}`;
 	}
 
 	await updateCartNotes(cartId, Number(restaurantId), meta);
 	await upsertCartItem(cartId, Number(itemId), itemQuantity);
+	
+	// Calculate and update subtotal after adding item
+	await calculateAndUpdateCartSubtotal(cartId);
 }
 
 export async function updateCartData(userId: number, payload: Omit<cartPayload, 'restaurantId'>) {
@@ -78,4 +82,7 @@ export async function updateCartData(userId: number, payload: Omit<cartPayload, 
 	if (!cartId) throw new Error('No active cart');
 
 	await upsertCartItem(cartId, Number(payload.itemId), payload.itemQuantity);
+	
+	// Calculate and update subtotal after updating item
+	await calculateAndUpdateCartSubtotal(cartId);
 }
