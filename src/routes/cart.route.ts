@@ -55,7 +55,8 @@ router.put('/cart', updateCart);
 					itemId: number,
 					itemName: string,
 					itemImage: string,
-					quantity: number
+					quantity: number,
+					itemPrice: number
 				}
 			];
 		}

@@ -114,7 +114,7 @@ export async function getTopRestaurants(limit: number = 7): Promise<Restaurant[]
       type,
       rating,
       image_url AS "image",
-			delivery_fee::text AS "deliveryFee"
+      COALESCE(delivery_fee::text, '0') AS "deliveryFee"
     FROM restaurant_info
     ORDER BY rating DESC
     LIMIT ${limit}

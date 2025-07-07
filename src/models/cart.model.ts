@@ -5,7 +5,8 @@ export type cartItemsInfo = {
 	itemId: string,
 	itemName: string,
 	itemImage: string,
-	quantity: number
+	quantity: number,
+	itemPrice: number
 };
 
 type cartMeta = {
@@ -121,7 +122,7 @@ export async function getCartItems(cartId: number): Promise<cartItemsInfo[]> {
       ci.item_id AS "itemId",
       mi.name AS "itemName",
       mi.image_url AS "itemImage",
-      ci.quantity AS "cartItemCount",
+      ci.quantity AS "quantity",
 			mi.description AS "itemDescription",
 			mi.price AS "itemPrice"
     FROM cart_items ci
@@ -141,4 +142,57 @@ export async function getRestaurantInfo(restaurantId: number): Promise<Restauran
 		WHERE restaurant_id = ${restaurantId}
 	`;
 	return restaurantData ?? null;
+}
+
+export async function getMenuItemPrice(itemId: number): Promise<number> {
+  const result: { price: number }[] = await sql`
+    SELECT price FROM menu_items WHERE id = ${itemId}
+  `;
+  return result[0]?.price ?? 0;
+}
+
+export async function getCartItemQuantity(cartId: number, itemId: number): Promise<number> {
+  const result: { quantity: number }[] = await sql`
+    SELECT quantity FROM cart_items WHERE cart_id = ${cartId} AND item_id = ${itemId}
+  `;
+  return result[0]?.quantity ?? 0;
+}
+
+export async function calculateAndUpdateCartSubtotal(cartId: number): Promise<void> {
+  const subtotal: { subtotal: number }[] = await sql`
+    SELECT COALESCE(SUM(ci.quantity * mi.price), 0) as subtotal
+    FROM cart_items ci
+    JOIN menu_items mi ON ci.item_id = mi.id
+    WHERE ci.cart_id = ${cartId}
+  `;
+  
+  await sql`
+    UPDATE carts SET subtotal = ${subtotal[0]?.subtotal ?? 0}
+    WHERE id = ${cartId}
+  `;
+}
+
+export async function updateCartSubtotalForItem(cartId: number, itemId: number, newQuantity: number): Promise<void> {
+  // Get the current subtotal
+  const currentSubtotal: { subtotal: number }[] = await sql`
+    SELECT subtotal FROM carts WHERE id = ${cartId}
+  `;
+  
+  // Get the item price
+  const itemPrice = await getMenuItemPrice(itemId);
+  
+  // Get the old quantity
+  const oldQuantity = await getCartItemQuantity(cartId, itemId);
+  
+  // Calculate the difference
+  const quantityDifference = newQuantity - oldQuantity;
+  const priceDifference = quantityDifference * itemPrice;
+  
+  // Update the subtotal
+  const newSubtotal = (currentSubtotal[0]?.subtotal ?? 0) + priceDifference;
+  
+  await sql`
+    UPDATE carts SET subtotal = ${newSubtotal}
+    WHERE id = ${cartId}
+  `;
 }
